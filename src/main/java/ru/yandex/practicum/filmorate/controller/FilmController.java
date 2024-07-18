@@ -41,7 +41,7 @@ public class FilmController {
         return new ArrayList<>(films.values());
     }
 
-    private int getIdForFilm() {;
+    private int getIdForFilm() {
         return ++idFilm;
     }
 }

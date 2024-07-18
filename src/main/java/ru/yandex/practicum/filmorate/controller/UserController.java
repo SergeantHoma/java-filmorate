@@ -45,7 +45,7 @@ public class UserController {
         return new ArrayList<>(usersMap.values());
     }
 
-    private int getId(){
+    private int getId() {
         id++;
         return id;
     }
