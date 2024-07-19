@@ -50,7 +50,7 @@ public class UserController {
         return id;
     }
 
-    private void userValidation(User user) throws ValidationException {
+    private void userValidation(User user) {
         if (user.getName() == null) {
             user.setName(user.getLogin());
         }

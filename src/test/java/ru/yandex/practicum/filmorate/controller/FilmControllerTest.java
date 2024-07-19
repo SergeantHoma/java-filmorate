@@ -54,10 +54,7 @@ class FilmControllerTest {
 
     @Test
     void createIncorrectDescriptionFilm() throws Exception {
-        testFilm.setDescription("\"Пятеро друзей ( комик-группа «Шарло»), приезжают в город Бризуль. " +
-                "Здесь они хотят разыскать господина Огюста Куглова, который задолжал им деньги, " +
-                "а именно 20 миллионов. о Куглов, который за время «своего отсутствия», " +
-                "стал кандидатом Коломбани.\"");
+        testFilm.setDescription("1".repeat(201));
         mockMvc.perform(
                         post("/films")
                                 .content(objectMapper.writeValueAsString(testFilm))

@@ -10,9 +10,6 @@ import ru.yandex.practicum.filmorate.util.IncludingSpace;
 
 import java.time.LocalDate;
 
-/**
- * User.
- */
 @Builder
 @Data
 public class User {
@@ -20,7 +17,6 @@ public class User {
     @Email
     @NotNull
     private String email;
-    @NotNull
     @NotBlank
     @IncludingSpace
     private String login;
