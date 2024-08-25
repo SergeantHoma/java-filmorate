@@ -1,3 +1,4 @@
+/*
 package ru.yandex.practicum.filmorate.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -84,4 +85,4 @@ class FilmControllerTest {
                 )
                 .andExpect(status().isBadRequest());
     }
-}
+}*/

@@ -9,11 +9,13 @@ import org.hibernate.validator.constraints.NotBlank;
 import ru.yandex.practicum.filmorate.util.IncludingSpace;
 
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Builder
 @Data
 public class User {
-    private int id;
+    private Long id;
     @Email
     @NotNull
     private String email;
@@ -24,4 +26,5 @@ public class User {
     @NotNull
     @Past
     private LocalDate birthday;
+    private Set<Long> friends = new HashSet<>();
 }
