@@ -16,14 +16,14 @@ public class InMemoryUserStorage implements UserStorage {
     private Long id = 0L;
 
     @Override
-    public Collection<User> getAllUsers() {
-        return new ArrayList<>(users.values());
-    }
-
-    @Override
     public User getUserById(Long userId) {
         return Optional.ofNullable(users.get(userId))
                 .orElseThrow(() -> new UserException(String.format("Пользователь с id: %d не найден", userId)));
+    }
+
+    @Override
+    public Collection<User> getAllUsers() {
+        return new ArrayList<>(users.values());
     }
 
     @Override
@@ -56,6 +56,11 @@ public class InMemoryUserStorage implements UserStorage {
             users.remove(userId);
             log.info("Запрос на удаление пользователя. Пользователь удален");
         }
+    }
+
+    @Override
+    public User getUser(Long userId) {
+        return users.get(userId);
     }
 
     private Long getId() {

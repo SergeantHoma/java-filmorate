@@ -14,4 +14,6 @@ public interface UserStorage {
     User update(User user);
 
     void delete(Long userId);
+
+    User getUser(Long userId);
 }
