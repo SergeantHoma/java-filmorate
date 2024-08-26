@@ -2,7 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exeption.UserException;
+import ru.yandex.practicum.filmorate.exeption.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -21,22 +21,23 @@ public class UserService {
         User user1 = userStorage.getUser(id);
         User user2 = userStorage.getUser(friendId);
         if (user1.getFriends().contains(friendId)) {
-            throw new UserException("Друг с таким id уже добавлен");
+            throw new ValidationException("Друг с таким id уже добавлен");
         }
         user1.getFriends().add(friendId);
 
         if (user2.getFriends().contains(id)) {
-            throw new UserException("Друг с таким id уже добавлен");
+            throw new ValidationException("Друг с таким id уже добавлен");
         }
         user2.getFriends().add(id);
     }
 
     public void deleteFriend(Long id, Long friendId) {
-        final User user = userStorage.getUserById(id);
-        final User userFriend = userStorage.getUserById(friendId);
-
-        user.getFriends().remove(friendId);
-        userFriend.getFriends().remove(id);
+        userNotNullValidate(id);
+        userNotNullValidate(friendId);
+        User user1 = userStorage.getUser(id);
+        User user2 = userStorage.getUser(friendId);
+        user1.getFriends().remove(friendId);
+        user2.getFriends().remove(id);
     }
 
     public List<User> getFriendsUser(Long id) {
@@ -74,7 +75,7 @@ public class UserService {
 
     private void userNotNullValidate(long userId) {
         if (userStorage.getUser(userId) == null) {
-            throw new UserException("Пользователь с таким id не найден");
+            throw new ValidationException("Пользователь с таким id не найден");
         }
     }
 }

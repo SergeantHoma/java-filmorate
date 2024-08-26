@@ -1,10 +1,11 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import jakarta.validation.Valid;
+import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
-import ru.yandex.practicum.filmorate.exeption.UserException;
+import ru.yandex.practicum.filmorate.exeption.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
 import java.util.*;
@@ -18,7 +19,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User getUserById(Long userId) {
         return Optional.ofNullable(users.get(userId))
-                .orElseThrow(() -> new UserException(String.format("Пользователь с id: %d не найден", userId)));
+                .orElseThrow(() -> new NotFoundException(String.format("Пользователь с id: %d не найден", userId)));
     }
 
     @Override
@@ -43,7 +44,7 @@ public class InMemoryUserStorage implements UserStorage {
             log.info("Запрос на изменение пользователя. Пользователь изменён.");
         } else {
             log.warn("Запрос на изменение пользователя. Пользователь не найден");
-            throw new UserException("Пользователь не найден.");
+            throw new ValidationException("Пользователь не найден.");
         }
         return user;
     }
@@ -52,6 +53,7 @@ public class InMemoryUserStorage implements UserStorage {
     public void delete(Long userId) {
         if (!users.containsKey(userId)) {
             log.info("Запрос на удаление пользователя. Пользователь не найден");
+            throw new NotFoundException("Пользователь не найден");
         } else {
             users.remove(userId);
             log.info("Запрос на удаление пользователя. Пользователь удален");
