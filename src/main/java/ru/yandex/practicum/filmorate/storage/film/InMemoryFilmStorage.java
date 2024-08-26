@@ -48,6 +48,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     public void delete(Long filmId) {
         if (!films.containsKey(filmId)) {
             log.info("Запрос на удаление фильма. Фильм не найден");
+            throw new NotFoundException("Фильм не найден");
         } else {
             films.remove(filmId);
             log.info("Запрос на удаление фильма. Фильм удален");

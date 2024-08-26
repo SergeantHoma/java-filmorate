@@ -1,7 +1,6 @@
 package ru.yandex.practicum.filmorate.storage.user;
 
 import jakarta.validation.Valid;
-import jakarta.validation.ValidationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -44,7 +43,7 @@ public class InMemoryUserStorage implements UserStorage {
             log.info("Запрос на изменение пользователя. Пользователь изменён.");
         } else {
             log.warn("Запрос на изменение пользователя. Пользователь не найден");
-            throw new ValidationException("Пользователь не найден.");
+            throw new NotFoundException("Пользователь не найден.");
         }
         return user;
     }
