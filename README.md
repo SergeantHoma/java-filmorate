@@ -3,4 +3,4 @@ Template repository for Filmorate project.
 ## Схема базы данных
 https://dbdiagram.io/d/66cd4a9f3f611e76e99165ef
 
-<img width="1047" alt="Снимок экрана 2024-08-27 в 06 37 09" src="https://github.com/user-attachments/assets/ecf27cc2-cf72-4a72-9d58-4266eb869ae3">
+<img width="994" alt="Снимок экрана 2024-08-28 в 01 17 08" src="https://github.com/user-attachments/assets/c068fdb5-8f94-4877-a710-0f93a8980e5b">
