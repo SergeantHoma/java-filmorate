@@ -1,5 +1,5 @@
 # java-filmorate
-Template repository for Filmorate project.
+Репозитория для проекта Filmorate.
 ## Схема базы данных
 https://dbdiagram.io/d/66cd4a9f3f611e76e99165ef
 
