@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository
 public class GenreDbStorage extends BaseDbStorage<Genre> {

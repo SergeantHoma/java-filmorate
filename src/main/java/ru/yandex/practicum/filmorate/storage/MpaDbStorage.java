@@ -8,7 +8,6 @@ import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Repository
 @Slf4j
