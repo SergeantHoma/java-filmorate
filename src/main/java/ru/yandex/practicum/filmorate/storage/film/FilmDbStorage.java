@@ -6,12 +6,13 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.storage.BaseDbStorage;
 
 import java.sql.Date;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Repository
 @Slf4j
@@ -50,10 +51,17 @@ public class FilmDbStorage extends BaseDbStorage<Film> implements FilmStorage {
                 film.getDuration(),
                 film.getMpa().getId());
         film.setId(id);
-        for (Genre genre : film.getGenres()) {
-            update(insertGenresQuery, id, genre.getId());
-        }
         log.info("Запрос на добавление фильма с id = {}", id);
+
+        // Подготовка данных для пакетной вставки жанров
+        List<Object[]> batchArgs = film.getGenres().stream()
+                .map(genre -> new Object[]{id, genre.getId()})
+                .collect(Collectors.toList());
+
+        // Выполнение пакетной вставки жанров
+        jdbc.batchUpdate(insertGenresQuery, batchArgs);
+
+        log.info("Жанры для фильма с id = {} добавлены", id);
         return film;
     }
 
