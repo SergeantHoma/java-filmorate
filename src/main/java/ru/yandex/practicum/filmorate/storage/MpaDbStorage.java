@@ -2,12 +2,12 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @Slf4j
@@ -26,24 +26,27 @@ public class MpaDbStorage extends BaseDbStorage<Mpa> {
         return findOne(findMpaById, mpaId);
     }
 
-    public Map<Long, Mpa> getMpaByFilmIds(List<Long> filmIds) {
-        String sql = "SELECT f.id AS film_id, m.id AS mpa_id, m.name FROM films f " +
+    public Map<Long, Mpa> getMpasByFilmIds(List<Long> filmIds) {
+        String query = "SELECT f.id AS film_id, m.id AS mpa_id, m.name AS mpa_name " +
+                "FROM films f " +
                 "JOIN mpa m ON f.mpa_id = m.id " +
-                "WHERE f.id IN (:filmIds)";
+                "WHERE f.id IN (" + String.join(",", Collections.nCopies(filmIds.size(), "?")) + ")";
 
-        Map<Long, Mpa> mpaByFilmId = new HashMap<>();
+        return jdbc.query(query, (rs, rowNum) -> {
+                    Long filmId = rs.getLong("film_id");
+                    Integer mpaId = rs.getInt("mpa_id");
+                    String mpaName = rs.getString("mpa_name");
 
-        jdbc.query(sql, (PreparedStatementSetter) Map.of("filmIds", filmIds), rs -> {
-            Long filmId = rs.getLong("film_id");
+                    Mpa mpa = new Mpa();
+                    mpa.setId(mpaId);
+                    mpa.setName(mpaName);
 
-            // Создаем объект Mpa и устанавливаем значения через сеттеры
-            Mpa mpa = new Mpa();
-            mpa.setId(rs.getInt("mpa_id"));
-            mpa.setName(rs.getString("name"));
-
-            mpaByFilmId.put(filmId, mpa);
-        });
-
-        return mpaByFilmId;
+                    return new AbstractMap.SimpleEntry<>(filmId, mpa);
+                }, filmIds.toArray())
+                .stream()
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        Map.Entry::getValue
+                ));
     }
 }

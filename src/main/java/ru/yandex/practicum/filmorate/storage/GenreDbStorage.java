@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.storage;
 
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.PreparedStatementSetter;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.model.Genre;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 public class GenreDbStorage extends BaseDbStorage<Genre> {
@@ -30,24 +30,27 @@ public class GenreDbStorage extends BaseDbStorage<Genre> {
         return findMany(findByFilmIdQuery, filmId);
     }
 
-    public Map<Long, List<Genre>> getGenresByFilmIds(List<Long> filmIds) {
-        String sql = "SELECT fg.film_id, g.id, g.name FROM film_genre fg " +
+    public Map<Long, List<Genre>> getGenresByFilmIds(Collection<Long> filmIds) {
+        String query = "SELECT fg.film_id, g.id AS genre_id, g.name AS genre_name " +
+                "FROM film_genre fg " +
                 "JOIN genres g ON fg.genre_id = g.id " +
-                "WHERE fg.film_id IN (:filmIds)";
+                "WHERE fg.film_id IN (" + String.join(",", Collections.nCopies(filmIds.size(), "?")) + ")";
 
-        Map<Long, List<Genre>> genresByFilmId = new HashMap<>();
+        return jdbc.query(query, (rs, rowNum) -> {
+                    Long filmId = rs.getLong("film_id");
+                    Integer genreId = rs.getInt("genre_id");
+                    String genreName = rs.getString("genre_name");
 
-        jdbc.query(sql, (PreparedStatementSetter) Map.of("filmIds", filmIds), rs -> {
-            Long filmId = rs.getLong("film_id");
+                    Genre genre = new Genre();
+                    genre.setId(genreId);
+                    genre.setName(genreName);
 
-            // Создаем объект Genre и устанавливаем значения через сеттеры
-            Genre genre = new Genre();
-            genre.setId(rs.getInt("id"));
-            genre.setName(rs.getString("name"));
-
-            genresByFilmId.computeIfAbsent(filmId, k -> new ArrayList<>()).add(genre);
-        });
-
-        return genresByFilmId;
+                    return new AbstractMap.SimpleEntry<>(filmId, genre);
+                }, filmIds.toArray())
+                .stream()
+                .collect(Collectors.groupingBy(
+                        Map.Entry::getKey,
+                        Collectors.mapping(Map.Entry::getValue, Collectors.toList())
+                ));
     }
 }

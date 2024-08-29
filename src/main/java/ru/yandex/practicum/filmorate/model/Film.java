@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.model;
 
 import jakarta.validation.constraints.*;
 import lombok.Data;
+import lombok.Setter;
 import ru.yandex.practicum.filmorate.util.MinimumDate;
 
 import java.time.LocalDate;
@@ -22,5 +23,6 @@ public class Film {
     private int duration;
     @NotNull
     private Mpa mpa;
-    private final Set<Genre> genres = new HashSet<>();
+    @Setter
+    private Set<Genre> genres = new HashSet<>();
 }

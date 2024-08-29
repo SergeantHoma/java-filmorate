@@ -31,51 +31,37 @@ public class FilmService {
     private final MpaDbStorage mpaDbStorage;
 
     public Collection<Film> getPopularFilms(Long count) {
-        // Получаем список популярных фильмов
         final Collection<Film> films = filmStorage.getPopularFilms().stream()
                 .limit(count)
                 .toList();
-
-        // Собираем все id фильмов для запроса жанров и MPA одним запросом
         List<Long> filmIds = films.stream()
                 .map(Film::getId)
                 .collect(Collectors.toList());
-
-        // Получаем жанры для всех фильмов за один запрос
         Map<Long, List<Genre>> genresByFilmId = genreDbStorage.getGenresByFilmIds(filmIds);
-
-        // Получаем MPA для всех фильмов за один запрос
-        Map<Long, Mpa> mpaByFilmId = mpaDbStorage.getMpaByFilmIds(filmIds);
-
-        // Привязываем жанры и MPA к фильмам
+        Map<Long, Mpa> mpaByFilmId = mpaDbStorage.getMpasByFilmIds(filmIds);
         for (Film film : films) {
-            film.getGenres().addAll(genresByFilmId.getOrDefault(film.getId(), new ArrayList<>()));
-            film.setMpa(mpaByFilmId.get(film.getId()));
+            List<Genre> genres = genresByFilmId.getOrDefault(film.getId(), new ArrayList<>());
+            film.getGenres().addAll(genres);
+            Mpa mpa = mpaByFilmId.get(film.getId());
+            if (mpa != null) {
+                film.setMpa(mpa);
+            }
         }
-
         return films;
     }
 
     public Collection<Film> getAllFilms() {
-        final Collection<Film> films = filmStorage.getAllFilms();
-        if (films.isEmpty()) {
-            return films;
-        }
-
+        Collection<Film> films = filmStorage.getAllFilms();
         List<Long> filmIds = films.stream()
                 .map(Film::getId)
                 .collect(Collectors.toList());
-
-        // Получаем жанры и MPA для всех фильмов за один запрос
-        Map<Long, List<Genre>> genresByFilmId = genreDbStorage.getGenresByFilmIds(filmIds);
-        Map<Long, Mpa> mpaByFilmId = mpaDbStorage.getMpaByFilmIds(filmIds);
-
-        // Привязываем жанры и MPA к фильмам
+        Map<Long, List<Genre>> filmGenres = genreDbStorage.getGenresByFilmIds(filmIds);
+        Map<Long, Mpa> filmMpas = mpaDbStorage.getMpasByFilmIds(filmIds);
         for (Film film : films) {
-            film.getGenres().addAll(genresByFilmId.getOrDefault(film.getId(), Collections.emptyList()));
-            film.setMpa(mpaByFilmId.get(film.getId()));
+            Long filmId = film.getId();
+            film.setGenres(new HashSet<>(filmGenres.getOrDefault(filmId, Collections.emptyList())));
+            film.setMpa(filmMpas.get(filmId));
         }
-
         return films;
     }
 
@@ -129,24 +115,17 @@ public class FilmService {
     }
 
     private void checkMpaAndGenres(Film film) {
-        // Получаем все MPA за один запрос
         List<Mpa> allMpas = (List<Mpa>) mpaDbStorage.getAllMpa();
         Map<Integer, Mpa> mpaMap = allMpas.stream()
                 .collect(Collectors.toMap(Mpa::getId, mpa -> mpa));
-
-        // Проверяем корректность MPA
         Integer mpaId = film.getMpa().getId();
         if (!mpaMap.containsKey(mpaId)) {
             log.warn("Некорректный у Mpa id = {}", mpaId);
             throw new ValidationException(String.format("Некорректный у Mpa id = %d", mpaId));
         }
-
-        // Получаем все жанры за один запрос
         List<Genre> allGenres = (List<Genre>) genreDbStorage.getAllGenres();
         Map<Integer, Genre> genreMap = allGenres.stream()
                 .collect(Collectors.toMap(Genre::getId, genre -> genre));
-
-        // Проверяем корректность жанров
         for (Genre genre : film.getGenres()) {
             if (!genreMap.containsKey(genre.getId())) {
                 log.warn("Некорректный у Genre id = {}", genre.getId());
